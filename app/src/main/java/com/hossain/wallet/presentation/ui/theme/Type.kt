@@ -1,4 +1,4 @@
-package com.hossain.wallet.ui.theme
+package com.hossain.wallet.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

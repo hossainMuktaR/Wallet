@@ -1,4 +1,4 @@
-package com.hossain.wallet.ui.theme
+package com.hossain.wallet.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build
