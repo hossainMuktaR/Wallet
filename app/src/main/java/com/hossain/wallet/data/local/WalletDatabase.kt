@@ -4,24 +4,24 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.hossain.wallet.data.local.dao.BorrowBillDao
-import com.hossain.wallet.data.local.dao.LendBillDao
+import com.hossain.wallet.data.local.dao.OwedBillDao
+import com.hossain.wallet.data.local.dao.DebtBillDao
 import com.hossain.wallet.data.local.dao.ReceivedBillDao
 import com.hossain.wallet.data.local.dao.SpendBillDao
-import com.hossain.wallet.data.model.BorrowBill
-import com.hossain.wallet.data.model.LendBill
+import com.hossain.wallet.data.model.DebtBill
+import com.hossain.wallet.data.model.OwedBill
 import com.hossain.wallet.data.model.ReceivedBill
 import com.hossain.wallet.data.model.SpendBill
 import kotlin.concurrent.Volatile
 
 @Database(
-    entities = [BorrowBill::class, LendBill::class, ReceivedBill::class, SpendBill::class],
+    entities = [OwedBill::class, DebtBill::class, ReceivedBill::class, SpendBill::class],
     version = 1,
     exportSchema = false
 )
 abstract class WalletDatabase : RoomDatabase() {
-    abstract fun borrowBillDao(): BorrowBillDao
-    abstract fun lendBillDao(): LendBillDao
+    abstract fun owedBillDao(): OwedBillDao
+    abstract fun debtBillDao(): DebtBillDao
     abstract fun receivedBillDao(): ReceivedBillDao
     abstract fun spendBillDao(): SpendBillDao
 

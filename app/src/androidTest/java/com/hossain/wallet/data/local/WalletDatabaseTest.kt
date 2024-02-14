@@ -6,7 +6,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.matcher.ViewMatchers.assertThat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.hossain.wallet.data.model.LendBill
+import com.hossain.wallet.domain.model.BillType
+import com.hossain.wallet.data.model.DeptBill
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.`is`
@@ -39,17 +40,18 @@ class WalletDatabaseTest {
     @Test
     fun insertNoteAndGetById() = runTest {
         // GIVEN - Insert note
-        val data = LendBill(
+        val data = DeptBill(
             id = 10,
             amount = 100,
             deptPerson = "Mine",
             date = 92846384346,
-            note = "This is a Note"
+            note = "This is a Note",
+            type = BillType.CASH
         )
-        database.lendBillDao().insert(data)
+        database.debtBillDao().insert(data)
 
         // WHEN - Get the note by id
-        val retriveNote = database.lendBillDao().getById(data.id).first()
+        val retriveNote = database.debtBillDao().getById(data.id).first()
 
         // THEN - the loaded data contains the expected values
         assertThat(retriveNote, notNullValue())

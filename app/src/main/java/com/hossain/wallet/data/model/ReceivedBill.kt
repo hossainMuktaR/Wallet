@@ -3,6 +3,7 @@ package com.hossain.wallet.data.model
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.hossain.wallet.domain.model.Bill
+import com.hossain.wallet.domain.model.BillType
 
 @Entity(
     tableName = "receivedbill"

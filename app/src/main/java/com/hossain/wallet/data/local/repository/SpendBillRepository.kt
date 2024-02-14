@@ -3,6 +3,7 @@ package com.hossain.wallet.data.local.repository
 import com.hossain.wallet.data.local.dao.SpendBillDao
 import com.hossain.wallet.data.model.SpendBill
 import com.hossain.wallet.domain.model.Bill
+import com.hossain.wallet.domain.model.BillType
 import com.hossain.wallet.domain.repository.DefaultRepository
 import kotlinx.coroutines.flow.Flow
 
@@ -21,11 +22,23 @@ class SpendBillRepository(
         billDao.delete(bill)
     }
 
-    override fun getAll(): Flow<List<SpendBill>> {
-        return billDao.getAll()
+    override fun getAllByBillType(billType: BillType): Flow<List<SpendBill>> {
+        if(billType == BillType.All){
+            return billDao.getAll()
+        }else {
+            return billDao.getAllByBillType(billType.name)
+        }
     }
 
     override fun getById(id: Int): Flow<SpendBill> {
         return billDao.getById(id)
+    }
+
+    suspend fun getTotalAmountByType(billType: BillType): Int {
+        if(billType == BillType.All){
+            return billDao.getTotalSpendAmount()
+        }else {
+            return billDao.getTotalSpendAmountByType(billType.name)
+        }
     }
 }

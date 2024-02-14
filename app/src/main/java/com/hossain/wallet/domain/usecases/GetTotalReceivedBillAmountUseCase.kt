@@ -20,7 +20,7 @@ class GetTotalReceivedBillAmountUseCase(
 
     private suspend fun getTotalBillAmount(scope: CoroutineScope): Int {
         var totalBillAmount = 0
-        val listOfBill = receivedBillRepository.getAll().stateIn(scope).value
+        val listOfBill = receivedBillRepository.getAllByBillType().stateIn(scope).value
         listOfBill.forEach {
             totalBillAmount += it.amount
         }
