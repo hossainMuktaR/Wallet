@@ -18,7 +18,8 @@ import com.hossain.wallet.presentation.components.SimpleStatement
 @Composable
 fun ReceivedStatement(
     statement: List<BillStatement>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onStatementClick: (BillStatement)-> Unit
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
         Box(
@@ -37,7 +38,10 @@ fun ReceivedStatement(
             } else {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     items(statement) { statement ->
-                        SimpleStatement(statement)
+                        SimpleStatement(
+                            statement,
+                            onClick = onStatementClick
+                        )
                     }
                 }
 

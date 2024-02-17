@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.hossain.wallet.domain.model.Bill
+import com.hossain.wallet.domain.model.BillStatement
 import com.hossain.wallet.domain.model.BillType
 
 @Entity(
@@ -19,3 +20,14 @@ data class SpendBill(
     val type: BillType,
     val note: String?
 ): Bill
+
+fun SpendBill.toBillStatement(): BillStatement {
+    return BillStatement(
+        id = this.id,
+        type = this.type,
+        amount = this.amount,
+        date = this.date,
+        title = this.costFactor,
+        note = this.note
+    )
+}

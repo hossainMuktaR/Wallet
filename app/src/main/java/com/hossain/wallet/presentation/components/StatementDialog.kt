@@ -110,7 +110,7 @@ fun StatementDialog(
                     onNext = {
                         sourceFocusRequester.requestFocus()
                     }
-                ),
+                )
             )
             // hero message text field
             OutlinedTextField(

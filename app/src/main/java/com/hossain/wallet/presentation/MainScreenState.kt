@@ -10,4 +10,5 @@ data class MainScreenState(
     val statementList: List<BillStatement> = emptyList(),
     val billCategory: BillCategory = BillCategory.SPEND,
     val showDialog: Boolean = false,
+    val showStatementDialog: Boolean = false
 )

@@ -30,7 +30,8 @@ fun StatementSection(
     billCategory: BillCategory,
     statement: List<BillStatement>,
     modifier: Modifier = Modifier,
-    onCategoryClick: (BillCategory) -> Unit
+    onCategoryClick: (BillCategory) -> Unit,
+    onClick: (BillStatement) -> Unit
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
         Column() {
@@ -87,7 +88,10 @@ fun StatementSection(
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxWidth()) {
                         items(statement) { statement ->
-                            SimpleStatement(statement)
+                            SimpleStatement(
+                                statement,
+                                onClick = onClick
+                            )
                         }
                     }
 

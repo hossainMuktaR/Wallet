@@ -7,10 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface DefaultRepository<T> {
 
-    suspend fun insertBill(bill: T)
-
-    suspend fun updateBill(bill: T)
-
+    suspend fun upsert(bill: T)
     suspend fun deleteBill(bill: T)
 
     fun getAllByBillType(billType: BillType = BillType.All): Flow<List<T>>

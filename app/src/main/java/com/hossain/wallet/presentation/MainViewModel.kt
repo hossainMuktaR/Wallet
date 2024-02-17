@@ -1,6 +1,7 @@
 package com.hossain.wallet.presentation
 
 import android.content.Context
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,9 +17,14 @@ import com.hossain.wallet.data.model.DebtBill
 import com.hossain.wallet.data.model.OwedBill
 import com.hossain.wallet.data.model.ReceivedBill
 import com.hossain.wallet.data.model.SpendBill
+import com.hossain.wallet.data.model.toBillStatement
 import com.hossain.wallet.domain.model.BillCategory
 import com.hossain.wallet.domain.model.BillStatement
 import com.hossain.wallet.domain.model.BillType
+import com.hossain.wallet.domain.model.toDebtBill
+import com.hossain.wallet.domain.model.toOwedBill
+import com.hossain.wallet.domain.model.toReceivedBill
+import com.hossain.wallet.domain.model.toSpendBill
 import com.hossain.wallet.utils.getRemainAmountPercentage
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -35,6 +41,9 @@ class MainViewModel(
     var billType by mutableStateOf(BillType.CASH)
         private set
     var state by mutableStateOf(MainScreenState())
+        private set
+
+    var recentStatement: MutableState<BillStatement?> =  mutableStateOf(null)
         private set
 
     var dialogState by mutableStateOf(
@@ -94,13 +103,7 @@ class MainViewModel(
                 val statementList = receivedBillRepository.getAllByBillType(billType).stateIn(viewModelScope).value.toList()
                 state = state.copy(
                     statementList = statementList.map {
-                        BillStatement(
-                            amount = it.amount,
-                            date = it.date,
-                            title = it.source,
-                            type = it.type,
-                            note = it.note
-                        )
+                        it.toBillStatement()
                     }
                 )
             }
@@ -109,13 +112,7 @@ class MainViewModel(
                 val statementList = spendBillRepository.getAllByBillType(billType).stateIn(viewModelScope).value.toList()
                 state = state.copy(
                     statementList = statementList.map {
-                        BillStatement(
-                            amount = it.amount,
-                            date = it.date,
-                            title = it.costFactor,
-                            type = it.type,
-                            note = it.note
-                        )
+                        it.toBillStatement()
                     }
                 )
             }
@@ -124,13 +121,7 @@ class MainViewModel(
                 val statementList = deptBillRepository.getAllByBillType(billType).stateIn(viewModelScope).value.toList()
                 state = state.copy(
                     statementList = statementList.map {
-                        BillStatement(
-                            amount = it.amount,
-                            date = it.date,
-                            title = it.deptPerson,
-                            type = it.type,
-                            note = it.note
-                        )
+                        it.toBillStatement()
                     }
                 )
             }
@@ -139,13 +130,7 @@ class MainViewModel(
                 val statementList = owedBillRepository.getAllByBillType(billType).stateIn(viewModelScope).value.toList()
                 state = state.copy(
                     statementList = statementList.map {
-                        BillStatement(
-                            amount = it.amount,
-                            date = it.date,
-                            title = it.from,
-                            type = it.type,
-                            note = it.note
-                        )
+                        it.toBillStatement()
                     }
                 )
             }
@@ -183,6 +168,71 @@ class MainViewModel(
         changeShowDialogState(true)
     }
 
+    fun onStatementClick(billStatement: BillStatement) {
+        recentStatement.value = billStatement
+        state = state.copy(
+            showStatementDialog = true
+        )
+    }
+    fun onCancelStatementDialog(){
+        recentStatement.value = null
+        state = state.copy(
+            showStatementDialog = false
+        )
+        refreshStatementList()
+        statisticUpdate()
+    }
+
+    fun onEditStatementDialog(billStatement: BillStatement) {
+        dialogState = dialogState.copy(
+            amount = billStatement.amount,
+            id = billStatement.id,
+            heroMessage = billStatement.title,
+            note = billStatement.note,
+            date = billStatement.date
+        )
+        state = state.copy(
+            showStatementDialog = false,
+            showDialog = true
+        )
+    }
+
+    fun onDeleteStatementDialog(billStatement: BillStatement) = intent{
+        when(state.billCategory) {
+            BillCategory.RECEIVED -> {
+                try {
+                    receivedBillRepository.deleteBill(billStatement.toReceivedBill())
+                } finally {
+                    onCancelStatementDialog()
+                }
+            }
+
+            BillCategory.SPEND -> {
+                try {
+                    spendBillRepository.deleteBill(billStatement.toSpendBill())
+                } finally {
+                    onCancelStatementDialog()
+                }
+            }
+
+            BillCategory.DEBT -> {
+                try {
+                    deptBillRepository.deleteBill(billStatement.toDebtBill())
+                } finally {
+                    onCancelStatementDialog()
+                }
+            }
+
+            BillCategory.OWED -> {
+                try {
+                    owedBillRepository.deleteBill(billStatement.toOwedBill())
+                } finally {
+                    onCancelStatementDialog()
+                }
+            }
+        }
+    }
+
     private fun changeShowDialogState(value: Boolean) {
         state = state.copy(
             showDialog = value
@@ -199,57 +249,28 @@ class MainViewModel(
         if (dialogState.heroMessage.isNullOrBlank()) return
         when (dialogState.billCategory) {
             BillCategory.RECEIVED -> {
-                val receivedBill = ReceivedBill(
-                    amount = dialogState.amount,
-                    source = dialogState.heroMessage,
-                    type = dialogState.billType,
-                    note = dialogState.note,
-                    date = System.currentTimeMillis()
-                )
                 intent {
-                    receivedBillRepository.insertBill(receivedBill)
+                    receivedBillRepository.upsert(dialogState.toReceivedBill())
                     saveDoneRefreshState()
                 }
             }
 
             BillCategory.SPEND -> {
-                val spendBill = SpendBill(
-                    amount = dialogState.amount,
-                    costFactor = dialogState.heroMessage,
-                    type = dialogState.billType,
-                    note = dialogState.note,
-                    date = System.currentTimeMillis()
-                )
                 intent {
-                    spendBillRepository.insertBill(spendBill)
+                    spendBillRepository.upsert(dialogState.toSpendBill())
                     saveDoneRefreshState()
                 }
             }
 
             BillCategory.DEBT -> {
-                val deptBill = DebtBill(
-                    amount = dialogState.amount,
-                    deptPerson = dialogState.heroMessage,
-                    type = dialogState.billType,
-                    note = dialogState.note,
-                    date = System.currentTimeMillis()
-                )
                 intent {
-                    deptBillRepository.insertBill(deptBill)
+                    deptBillRepository.upsert(dialogState.toDebtBill())
                     saveDoneRefreshState()
                 }
             }
-
             BillCategory.OWED -> {
-                val owedBill = OwedBill(
-                    amount = dialogState.amount,
-                    from = dialogState.heroMessage,
-                    type = dialogState.billType,
-                    note = dialogState.note,
-                    date = System.currentTimeMillis()
-                )
                 intent {
-                    owedBillRepository.insertBill(owedBill)
+                    owedBillRepository.upsert(dialogState.toOwedBill())
                     saveDoneRefreshState()
                 }
             }

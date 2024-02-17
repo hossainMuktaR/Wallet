@@ -6,16 +6,14 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 import com.hossain.wallet.data.model.ReceivedBill
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ReceivedBillDao{
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(receivedBill: ReceivedBill)
-
-    @Update
-    suspend fun update(receivedBill: ReceivedBill)
+    @Upsert
+    suspend fun upsert(receivedBill: ReceivedBill)
 
     @Delete
     suspend fun delete(receivedBill: ReceivedBill)

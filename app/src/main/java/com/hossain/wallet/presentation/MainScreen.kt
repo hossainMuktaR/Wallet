@@ -30,7 +30,11 @@ import com.hossain.wallet.presentation.components.FabButton
 import com.hossain.wallet.presentation.components.StatementDialog
 import com.hossain.wallet.presentation.components.TopBar
 import androidx.activity.viewModels
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hossain.wallet.presentation.components.StatementDetails
 
 @Composable
 fun MainScreen() {
@@ -80,11 +84,13 @@ fun MainScreen() {
                         state.billCategory,
                         state.statementList,
                         Modifier.padding(top = 8.dp),
-                        onCategoryClick = vm::changeBillCategory
+                        onCategoryClick = vm::changeBillCategory,
+                        onClick = vm::onStatementClick
                     )
                 } else {
                     ReceivedStatement(
-                        state.statementList
+                        state.statementList,
+                        onStatementClick = vm::onStatementClick
                     )
                 }
             }
@@ -127,6 +133,32 @@ fun MainScreen() {
                     onCancel = vm::onDialogCancel,
                     onSave = vm::onDialogSave
                 )
+            }
+        }
+
+        AnimatedVisibility(
+            visible = state.showStatementDialog,
+            label = "Statement Dialog",
+            enter = fadeIn() + expandIn(expandFrom = Alignment.Center),
+            exit = fadeOut() + shrinkOut(shrinkTowards = Alignment.Center)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        MaterialTheme.colorScheme.background.copy(
+                            alpha = 0.7f
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            )
+            {
+               StatementDetails(
+                   billStatement = vm.recentStatement.value ?: return@Box,
+                   onCancelClick = vm::onCancelStatementDialog,
+                   onDeleteClick = vm::onDeleteStatementDialog,
+                   onEditClick = vm::onEditStatementDialog
+               )
             }
         }
 

@@ -9,12 +9,9 @@ import kotlinx.coroutines.flow.Flow
 class DebtBillRepository(
     private val billDao: DebtBillDao
 ): DefaultRepository<DebtBill> {
-    override suspend fun insertBill(bill: DebtBill) {
-        billDao.insert(bill)
-    }
 
-    override suspend fun updateBill(bill: DebtBill) {
-        billDao.update(bill)
+    override suspend fun upsert(bill: DebtBill) {
+        billDao.upsert(bill)
     }
 
     override suspend fun deleteBill(bill: DebtBill) {
