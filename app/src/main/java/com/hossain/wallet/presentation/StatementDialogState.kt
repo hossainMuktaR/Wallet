@@ -6,9 +6,10 @@ import com.hossain.wallet.data.model.ReceivedBill
 import com.hossain.wallet.data.model.SpendBill
 import com.hossain.wallet.domain.model.BillCategory
 import com.hossain.wallet.domain.model.BillType
+import org.mongodb.kbson.ObjectId
 
 data class StatementDialogState(
-    val id: Int? = null,
+    val id: ObjectId? = null,
     val billType: BillType,
     val billCategory: BillCategory,
     val amount: Int = 0,
@@ -19,8 +20,8 @@ data class StatementDialogState(
 
 fun StatementDialogState.toReceivedBill(): ReceivedBill {
     return ReceivedBill(
-        id = this.id?: 0,
-        type = this.billType,
+        _id = this.id?: ObjectId(),
+        type = this.billType.name,
         amount = this.amount,
         date = this.date?: System.currentTimeMillis(),
         receivedFrom = this.heroMessage,
@@ -29,8 +30,8 @@ fun StatementDialogState.toReceivedBill(): ReceivedBill {
 }
 fun StatementDialogState.toSpendBill(): SpendBill {
     return SpendBill(
-        id = this.id?: 0,
-        type = this.billType,
+        _id = this.id?: ObjectId(),
+        type = this.billType.name,
         amount = this.amount,
         date = this.date?: System.currentTimeMillis(),
         costFactor = this.heroMessage,
@@ -39,8 +40,8 @@ fun StatementDialogState.toSpendBill(): SpendBill {
 }
 fun StatementDialogState.toDebtBill(): DebtBill {
     return DebtBill(
-        id = this.id?: 0,
-        type = this.billType,
+        _id = this.id?: ObjectId(),
+        type = this.billType.name,
         amount = this.amount,
         date = this.date?: System.currentTimeMillis(),
         deptTo = this.heroMessage,
@@ -49,8 +50,8 @@ fun StatementDialogState.toDebtBill(): DebtBill {
 }
 fun StatementDialogState.toOwedBill(): OwedBill {
     return OwedBill(
-        id = this.id?: 0,
-        type = this.billType,
+        _id = this.id?: ObjectId(),
+        type = this.billType.name,
         amount = this.amount,
         date = this.date?: System.currentTimeMillis(),
         owedFrom = this.heroMessage,

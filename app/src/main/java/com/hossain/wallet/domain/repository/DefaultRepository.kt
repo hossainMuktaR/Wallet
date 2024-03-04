@@ -4,6 +4,7 @@ import com.hossain.wallet.data.model.ReceivedBill
 import com.hossain.wallet.domain.model.Bill
 import com.hossain.wallet.domain.model.BillType
 import kotlinx.coroutines.flow.Flow
+import org.mongodb.kbson.ObjectId
 
 interface DefaultRepository<T> {
 
@@ -12,5 +13,5 @@ interface DefaultRepository<T> {
 
     fun getAllByBillType(billType: BillType = BillType.All): Flow<List<T>>
 
-    fun getById(id: Int): Flow<T>
+    fun getById(id: ObjectId): Flow<T>
 }

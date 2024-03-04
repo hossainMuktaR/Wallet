@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.realmKotlin)
 }
 
 android {
@@ -76,10 +77,6 @@ dependencies {
     //for viewmodel in compose
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
-    //room dep
-    implementation(libs.androidx.room.runtime)
-    // optional - Kotlin Extensions and Coroutines support for Room
-    implementation(libs.androidx.room.ktx)
-    // To use Kotlin Symbol Processing (KSP)
-    ksp(libs.androidx.room.compiler)
+    // mongodb realm db
+    implementation(libs.realm.library.base)
 }

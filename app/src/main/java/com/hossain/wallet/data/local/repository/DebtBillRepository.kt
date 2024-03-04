@@ -5,6 +5,7 @@ import com.hossain.wallet.data.model.DebtBill
 import com.hossain.wallet.domain.model.BillType
 import com.hossain.wallet.domain.repository.DefaultRepository
 import kotlinx.coroutines.flow.Flow
+import org.mongodb.kbson.ObjectId
 
 class DebtBillRepository(
     private val billDao: DebtBillDao
@@ -26,7 +27,7 @@ class DebtBillRepository(
         }
     }
 
-    override fun getById(id: Int): Flow<DebtBill> {
+    override fun getById(id: ObjectId): Flow<DebtBill> {
         return billDao.getById(id)
     }
 }

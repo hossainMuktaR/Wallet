@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.hossain.wallet.App
 import com.hossain.wallet.data.local.WalletDatabase
 import com.hossain.wallet.data.local.repository.OwedBillRepository
 import com.hossain.wallet.data.local.repository.DebtBillRepository
@@ -32,11 +33,11 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     private val context: Context
 ) : ViewModel() {
-    private val walletDatabase = WalletDatabase.getWalletDatabase(context = context)
-    private val receivedBillRepository = ReceivedBillRepository(walletDatabase.receivedBillDao())
-    private val spendBillRepository = SpendBillRepository(walletDatabase.spendBillDao())
-    private val deptBillRepository = DebtBillRepository(walletDatabase.debtBillDao())
-    private val owedBillRepository = OwedBillRepository(walletDatabase.owedBillDao())
+    private val walletDatabase = WalletDatabase(App.realm)
+    private val receivedBillRepository = ReceivedBillRepository(walletDatabase.receivedBillDao)
+    private val spendBillRepository = SpendBillRepository(walletDatabase.spendBillDao)
+    private val deptBillRepository = DebtBillRepository(walletDatabase.debtBillDao)
+    private val owedBillRepository = OwedBillRepository(walletDatabase.owedBillDao)
 
     var billType by mutableStateOf(BillType.CASH)
         private set

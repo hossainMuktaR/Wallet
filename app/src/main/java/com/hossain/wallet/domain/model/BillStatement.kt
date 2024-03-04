@@ -4,9 +4,10 @@ import com.hossain.wallet.data.model.DebtBill
 import com.hossain.wallet.data.model.OwedBill
 import com.hossain.wallet.data.model.ReceivedBill
 import com.hossain.wallet.data.model.SpendBill
+import org.mongodb.kbson.ObjectId
 
 data class BillStatement(
-    val id : Int,
+    val id : ObjectId,
     val amount: Int,
     val date: Long,
     val title: String,
@@ -16,8 +17,8 @@ data class BillStatement(
 
 fun BillStatement.toReceivedBill(): ReceivedBill {
     return ReceivedBill(
-        id = this.id,
-        type = this.type,
+        _id = this.id,
+        type = this.type.name,
         amount = this.amount,
         date = this.date,
         receivedFrom = this.title,
@@ -26,8 +27,8 @@ fun BillStatement.toReceivedBill(): ReceivedBill {
 }
 fun BillStatement.toSpendBill(): SpendBill {
     return SpendBill(
-        id = this.id,
-        type = this.type,
+        _id = this.id,
+        type = this.type.name,
         amount = this.amount,
         date = this.date,
         costFactor = this.title,
@@ -36,8 +37,8 @@ fun BillStatement.toSpendBill(): SpendBill {
 }
 fun BillStatement.toDebtBill(): DebtBill {
     return DebtBill(
-        id = this.id,
-        type = this.type,
+        _id = this.id,
+        type = this.type.name,
         amount = this.amount,
         date = this.date,
         deptTo = this.title,
@@ -46,8 +47,8 @@ fun BillStatement.toDebtBill(): DebtBill {
 }
 fun BillStatement.toOwedBill(): OwedBill {
     return OwedBill(
-        id = this.id,
-        type = this.type,
+        _id = this.id,
+        type = this.type.name,
         amount = this.amount,
         date = this.date,
         owedFrom = this.title,
