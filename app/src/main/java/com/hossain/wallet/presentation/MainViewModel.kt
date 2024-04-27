@@ -5,19 +5,19 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.hossain.wallet.App
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.hossain.wallet.data.local.WalletDatabase
 import com.hossain.wallet.data.local.repository.OwedBillRepository
 import com.hossain.wallet.data.local.repository.DebtBillRepository
 import com.hossain.wallet.data.local.repository.ReceivedBillRepository
 import com.hossain.wallet.data.local.repository.SpendBillRepository
-import com.hossain.wallet.data.model.DebtBill
-import com.hossain.wallet.data.model.OwedBill
-import com.hossain.wallet.data.model.ReceivedBill
-import com.hossain.wallet.data.model.SpendBill
 import com.hossain.wallet.data.model.toBillStatement
 import com.hossain.wallet.domain.model.BillCategory
 import com.hossain.wallet.domain.model.BillStatement
@@ -26,25 +26,34 @@ import com.hossain.wallet.domain.model.toDebtBill
 import com.hossain.wallet.domain.model.toOwedBill
 import com.hossain.wallet.domain.model.toReceivedBill
 import com.hossain.wallet.domain.model.toSpendBill
+import com.hossain.wallet.utils.Constants
 import com.hossain.wallet.utils.getRemainAmountPercentage
+import dagger.hilt.android.lifecycle.HiltViewModel
+import io.realm.kotlin.mongodb.App
+import io.realm.kotlin.mongodb.Credentials
+import io.realm.kotlin.mongodb.GoogleAuthType
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MainViewModel(
-    private val context: Context
-) : ViewModel() {
-    private val walletDatabase = WalletDatabase(App.realm)
-    private val receivedBillRepository = ReceivedBillRepository(walletDatabase.receivedBillDao)
-    private val spendBillRepository = SpendBillRepository(walletDatabase.spendBillDao)
-    private val deptBillRepository = DebtBillRepository(walletDatabase.debtBillDao)
-    private val owedBillRepository = OwedBillRepository(walletDatabase.owedBillDao)
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val receivedBillRepository: ReceivedBillRepository,
+    private val debtBillRepository: DebtBillRepository,
+    private val spendBillRepository: SpendBillRepository,
+    private val owedBillRepository: OwedBillRepository,
+    ) : ViewModel() {
 
     var billType by mutableStateOf(BillType.CASH)
         private set
     var state by mutableStateOf(MainScreenState())
         private set
 
-    var recentStatement: MutableState<BillStatement?> =  mutableStateOf(null)
+    private var _isSignIn by mutableStateOf(false)
+    val isSignIn: Boolean = _isSignIn
+
+    var recentStatement: MutableState<BillStatement?> = mutableStateOf(null)
         private set
 
     var dialogState by mutableStateOf(
@@ -62,9 +71,24 @@ class MainViewModel(
     }
 
     init {
-        refreshStatementList()
-        statisticUpdate()
+        viewModelScope.launch {
+            checkedSignIn()
+        }
     }
+
+
+    private suspend fun checkedSignIn() {
+        App.create(Constants.APP_ID).currentUser?.let {
+            WalletDatabase.configRealmDb()
+            _isSignIn = true
+            delay(5000)
+            refreshStatementList()
+            statisticUpdate()
+        }
+        _isSignIn = false
+    }
+
+
 
     fun onDialogAmountTextChange(value: String) {
         var amount = 0
@@ -101,7 +125,8 @@ class MainViewModel(
         val billType = this.billType
         when (billCategory) {
             BillCategory.RECEIVED -> {
-                val statementList = receivedBillRepository.getAllByBillType(billType).stateIn(viewModelScope).value.toList()
+                val statementList = receivedBillRepository.getAllByBillType(billType)
+                    .stateIn(viewModelScope).value.toList()
                 state = state.copy(
                     statementList = statementList.map {
                         it.toBillStatement()
@@ -110,7 +135,8 @@ class MainViewModel(
             }
 
             BillCategory.SPEND -> {
-                val statementList = spendBillRepository.getAllByBillType(billType).stateIn(viewModelScope).value.toList()
+                val statementList = spendBillRepository.getAllByBillType(billType)
+                    .stateIn(viewModelScope).value.toList()
                 state = state.copy(
                     statementList = statementList.map {
                         it.toBillStatement()
@@ -119,7 +145,8 @@ class MainViewModel(
             }
 
             BillCategory.DEBT -> {
-                val statementList = deptBillRepository.getAllByBillType(billType).stateIn(viewModelScope).value.toList()
+                val statementList = debtBillRepository.getAllByBillType(billType)
+                    .stateIn(viewModelScope).value.toList()
                 state = state.copy(
                     statementList = statementList.map {
                         it.toBillStatement()
@@ -128,7 +155,8 @@ class MainViewModel(
             }
 
             BillCategory.OWED -> {
-                val statementList = owedBillRepository.getAllByBillType(billType).stateIn(viewModelScope).value.toList()
+                val statementList = owedBillRepository.getAllByBillType(billType)
+                    .stateIn(viewModelScope).value.toList()
                 state = state.copy(
                     statementList = statementList.map {
                         it.toBillStatement()
@@ -175,7 +203,8 @@ class MainViewModel(
             showStatementDialog = true
         )
     }
-    fun onCancelStatementDialog(){
+
+    fun onCancelStatementDialog() {
         recentStatement.value = null
         state = state.copy(
             showStatementDialog = false
@@ -198,8 +227,8 @@ class MainViewModel(
         )
     }
 
-    fun onDeleteStatementDialog(billStatement: BillStatement) = intent{
-        when(state.billCategory) {
+    fun onDeleteStatementDialog(billStatement: BillStatement) = intent {
+        when (state.billCategory) {
             BillCategory.RECEIVED -> {
                 try {
                     receivedBillRepository.deleteBill(billStatement.toReceivedBill())
@@ -218,7 +247,7 @@ class MainViewModel(
 
             BillCategory.DEBT -> {
                 try {
-                    deptBillRepository.deleteBill(billStatement.toDebtBill())
+                    debtBillRepository.deleteBill(billStatement.toDebtBill())
                 } finally {
                     onCancelStatementDialog()
                 }
@@ -247,7 +276,7 @@ class MainViewModel(
 
     fun onDialogSave() {
         if (dialogState.amount <= 0) return
-        if (dialogState.heroMessage.isNullOrBlank()) return
+        if (dialogState.heroMessage.isBlank()) return
         when (dialogState.billCategory) {
             BillCategory.RECEIVED -> {
                 intent {
@@ -265,10 +294,11 @@ class MainViewModel(
 
             BillCategory.DEBT -> {
                 intent {
-                    deptBillRepository.upsert(dialogState.toDebtBill())
+                    debtBillRepository.upsert(dialogState.toDebtBill())
                     saveDoneRefreshState()
                 }
             }
+
             BillCategory.OWED -> {
                 intent {
                     owedBillRepository.upsert(dialogState.toOwedBill())
@@ -284,6 +314,7 @@ class MainViewModel(
         refreshStatementList(state.billCategory)
         statisticUpdate()
     }
+
     private fun refreshDialogState() {
         dialogState = dialogState.copy(
             billType = billType,
@@ -302,16 +333,6 @@ class MainViewModel(
     private fun intent(transform: suspend () -> Unit) {
         viewModelScope.launch {
             transform()
-        }
-    }
-
-    companion object {
-        fun provideFactory(
-            context: Context
-        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return MainViewModel(context) as T
-            }
         }
     }
 }

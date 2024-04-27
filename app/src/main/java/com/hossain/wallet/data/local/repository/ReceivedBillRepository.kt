@@ -6,8 +6,9 @@ import com.hossain.wallet.domain.model.BillType
 import com.hossain.wallet.domain.repository.DefaultRepository
 import kotlinx.coroutines.flow.Flow
 import org.mongodb.kbson.ObjectId
+import javax.inject.Inject
 
-class ReceivedBillRepository(
+class ReceivedBillRepository @Inject constructor(
     private val billDao: ReceivedBillDao
 ): DefaultRepository<ReceivedBill> {
     override suspend fun upsert(bill: ReceivedBill) {

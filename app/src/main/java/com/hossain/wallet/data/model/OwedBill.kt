@@ -3,6 +3,8 @@ package com.hossain.wallet.data.model
 import com.hossain.wallet.domain.model.Bill
 import com.hossain.wallet.domain.model.BillStatement
 import com.hossain.wallet.domain.model.BillType
+import com.hossain.wallet.utils.Constants
+import io.realm.kotlin.mongodb.App
 import io.realm.kotlin.types.RealmObject
 import io.realm.kotlin.types.annotations.PrimaryKey
 import org.mongodb.kbson.ObjectId
@@ -10,6 +12,7 @@ import org.mongodb.kbson.ObjectId
 class OwedBill(): Bill, RealmObject {
     @PrimaryKey
     var _id: ObjectId = ObjectId()
+    var ownerId: String = App.create(Constants.APP_ID).currentUser!!.id
     var amount: Int = 0
     var owedFrom: String = ""
     var type: String = ""

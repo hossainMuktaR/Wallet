@@ -34,14 +34,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.hossain.wallet.presentation.components.StatementDetails
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    navController: NavController,
+    vm: MainViewModel = viewModel()
+) {
     val context = LocalContext.current
-    val vm: MainViewModel = viewModel(factory = MainViewModel.provideFactory(context))
     val state = vm.state
-
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -69,10 +71,10 @@ fun MainScreen() {
                 spendAmount = state.spendAmount,
                 percentage = state.remainPercentage,
                 onCardClick = {
-                    if(showStatement){
+                    if (showStatement) {
                         showStatement = false
                         vm.changeBillCategory(BillCategory.RECEIVED)
-                    }else {
+                    } else {
                         showStatement = true
                         vm.changeBillCategory(BillCategory.SPEND)
                     }
@@ -153,14 +155,15 @@ fun MainScreen() {
                 contentAlignment = Alignment.Center
             )
             {
-               StatementDetails(
-                   billStatement = vm.recentStatement.value ?: return@Box,
-                   onCancelClick = vm::onCancelStatementDialog,
-                   onDeleteClick = vm::onDeleteStatementDialog,
-                   onEditClick = vm::onEditStatementDialog
-               )
+                StatementDetails(
+                    billStatement = vm.recentStatement.value ?: return@Box,
+                    onCancelClick = vm::onCancelStatementDialog,
+                    onDeleteClick = vm::onDeleteStatementDialog,
+                    onEditClick = vm::onEditStatementDialog
+                )
             }
         }
 
     }
+
 }

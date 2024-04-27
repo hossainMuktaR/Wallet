@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.ksp)
     alias(libs.plugins.realmKotlin)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -74,9 +75,23 @@ dependencies {
     androidTestImplementation(libs.test.core.ktx)
     androidTestImplementation(libs.test.arch.core)
 
+    //for navigation
+    implementation(libs.navigation.compose)
+    implementation(libs.hilt.navigation.compose)
+
     //for viewmodel in compose
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     // mongodb realm db
-    implementation(libs.realm.library.base)
+    implementation(libs.realm.library.sync)
+
+    // google credential auth
+    implementation(libs.androidx.credentials)
+    implementation(libs.googleid)
+    implementation(libs.androidx.credentials.play.services.auth)
+
+    //hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    ksp(libs.hilt.android.compiler)
 }

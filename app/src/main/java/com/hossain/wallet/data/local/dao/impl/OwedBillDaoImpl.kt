@@ -1,5 +1,6 @@
 package com.hossain.wallet.data.local.dao.impl
 
+import com.hossain.wallet.data.local.WalletDatabase
 import com.hossain.wallet.data.local.dao.OwedBillDao
 import com.hossain.wallet.data.model.DebtBill
 import com.hossain.wallet.data.model.OwedBill
@@ -9,10 +10,12 @@ import io.realm.kotlin.ext.query
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.mongodb.kbson.ObjectId
+import javax.inject.Inject
 
 class OwedBillDaoImpl(
-    private val realm: Realm
 ) : OwedBillDao {
+
+    private val realm = WalletDatabase.realm!!
     override suspend fun upsert(owedBill: OwedBill) {
         realm.write {
             copyToRealm(owedBill, updatePolicy = UpdatePolicy.ALL)

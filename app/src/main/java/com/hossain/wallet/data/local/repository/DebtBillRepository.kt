@@ -6,8 +6,9 @@ import com.hossain.wallet.domain.model.BillType
 import com.hossain.wallet.domain.repository.DefaultRepository
 import kotlinx.coroutines.flow.Flow
 import org.mongodb.kbson.ObjectId
+import javax.inject.Inject
 
-class DebtBillRepository(
+class DebtBillRepository @Inject constructor(
     private val billDao: DebtBillDao
 ): DefaultRepository<DebtBill> {
 
